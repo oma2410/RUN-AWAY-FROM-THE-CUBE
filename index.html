@@ -25,16 +25,33 @@
       .controls {
         display: flex;
         justify-content: center;
-        margin-top: 10px;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .side-controls {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
       }
       button {
-        margin: 5px;
-        padding: 10px;
-        font-size: 18px;
+        margin: 10px;
+        padding: 15px 30px;
+        font-size: 22px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        border-radius: 10px;
+        background: #ff5722;
+        color: white;
+      }
+      button:hover {
+        background: #e64a19;
       }
       .high-score {
         margin-top: 10px;
-        font-size: 20px;
+        font-size: 22px;
+        font-weight: bold;
       }
     </style>
   </head>
@@ -47,10 +64,13 @@
     </div>
     <div class="controls">
       <button onclick="move('left')">⬅</button>
-      <button onclick="move('down')">⬇</button>
+      <button onclick="changeColor()">🎨</button>
       <button onclick="move('right')">➡</button>
     </div>
     <div class="controls">
+      <button onclick="move('down')">⬇</button>
+    </div>
+    <div class="side-controls">
       <button onclick="restartGame()">🔄 Начать заново</button>
     </div>
     <script>
@@ -59,7 +79,7 @@
       canvas.width = 400;
       canvas.height = 400;
 
-      let player, enemy, score, keys;
+      let player, enemy, score, keys, playerColor;
       let highScore = localStorage.getItem("highScore") || 0;
       document.getElementById("highScore").textContent = highScore;
 
@@ -68,6 +88,11 @@
         enemy = { x: 100, y: 100, size: 20, speed: 2 };
         score = 0;
         keys = {};
+        playerColor = "blue";
+      }
+
+      function changeColor() {
+        playerColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
       }
 
       window.addEventListener("keydown", (e) => (keys[e.key] = true));
@@ -115,7 +140,7 @@
 
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "blue";
+        ctx.fillStyle = playerColor;
         ctx.fillRect(player.x, player.y, player.size, player.size);
 
         ctx.fillStyle = "red";
@@ -136,3 +161,4 @@
     </script>
   </body>
 </html>
+
