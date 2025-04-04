@@ -1,164 +1,172 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Быстрая игра</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        text-align: center;
-        background: #000000;
-        color: white;
-        font-family: Arial, sans-serif;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Быстрая игра</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      text-align: center;
+      background: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      background: rgb(70, 29, 29);
+      display: block;
+      margin: 20px auto;
+      border: 2px solid black;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      margin: 10px;
+      padding: 20px 40px;
+      font-size: 28px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      border-radius: 12px;
+      background: #ff5722;
+      color: white;
+      min-width: 80px;
+    }
+    button:hover {
+      background: #e64a19;
+    }
+    .high-score {
+      margin-top: 10px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 500px) {
+      button {
+        padding: 20px;
+        font-size: 24px;
+        min-width: 70px;
       }
       canvas {
-        background: rgb(70, 29, 29);
-        display: block;
-        margin: 20px auto;
-        border: 2px solid rgb(0, 0, 0);
+        width: 90vw;
+        height: 90vw;
       }
-      .controls {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 20px;
-      }
-      .side-controls {
-        position: absolute;
-        top: 50%;
-        right: 10px;
-        transform: translateY(-50%);
-      }
-      button {
-        margin: 10px;
-        padding: 15px 30px;
-        font-size: 22px;
-        font-weight: bold;
-        border: none;
-        cursor: pointer;
-        border-radius: 10px;
-        background: #ff5722;
-        color: white;
-      }
-      button:hover {
-        background: #e64a19;
-      }
-      .high-score {
-        margin-top: 10px;
-        font-size: 22px;
-        font-weight: bold;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>МОНСТР КУБ!</h1>
-    <p class="high-score">Лучший результат: <span id="highScore">0</span></p>
-    <canvas id="gameCanvas"></canvas>
-    <div class="controls">
-      <button onclick="move('up')">⬆</button>
-    </div>
-    <div class="controls">
-      <button onclick="move('left')">⬅</button>
-      <button onclick="changeColor()">🎨</button>
-      <button onclick="move('right')">➡</button>
-    </div>
-    <div class="controls">
-      <button onclick="move('down')">⬇</button>
-    </div>
-    <div class="side-controls">
-      
-    </div>
-    <script>
-      const canvas = document.getElementById("gameCanvas");
-      const ctx = canvas.getContext("2d");
-      canvas.width = 400;
-      canvas.height = 400;
+    }
+  </style>
+</head>
+<body>
+  <h1>МОНСТР КУБ!</h1>
+  <p class="high-score">Лучший результат: <span id="highScore">0</span></p>
+  <canvas id="gameCanvas"></canvas>
+  <div class="controls">
+    <button onclick="move('up')">⬆</button>
+  </div>
+  <div class="controls">
+    <button onclick="move('left')">⬅</button>
+    <button onclick="changeColor()">🎨</button>
+    <button onclick="move('right')">➡</button>
+  </div>
+  <div class="controls">
+    <button onclick="move('down')">⬇</button>
+  </div>
 
-      let player, enemy, score, keys, playerColor;
-      let highScore = localStorage.getItem("highScore") || 0;
+  <script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = 400;
+  canvas.height = 400;
+
+  let player, enemy, score, playerColor, moveDirection = null;
+  let highScore = localStorage.getItem("highScore") || 0;
+  document.getElementById("highScore").textContent = highScore;
+
+  function initGame() {
+    player = { x: 180, y: 180, size: 20, speed: 2 };
+    enemy = { x: 100, y: 100, size: 20, speed: 2 };
+    score = 0;
+    playerColor = "blue";
+    moveDirection = null;
+  }
+
+  function changeColor() {
+    playerColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+  }
+
+  // Устанавливаем направление движения
+  function move(direction) {
+    moveDirection = direction;
+  }
+
+  function movePlayer() {
+    if (moveDirection === "up") player.y -= player.speed;
+    if (moveDirection === "down") player.y += player.speed;
+    if (moveDirection === "left") player.x -= player.speed;
+    if (moveDirection === "right") player.x += player.speed;
+
+    // Ограничения по краям
+    player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+    player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+  }
+
+  function restartGame() {
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("highScore", highScore);
       document.getElementById("highScore").textContent = highScore;
+    }
+    initGame();
+  }
 
-      function initGame() {
-        player = { x: 180, y: 180, size: 20, speed: 4 };
-        enemy = { x: 100, y: 100, size: 20, speed: 2 };
-        score = 0;
-        keys = {};
-        playerColor = "blue";
-      }
+  function update() {
+    movePlayer();
 
-      function changeColor() {
-        playerColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
-      }
+    // Враг двигается к игроку
+    enemy.x += (player.x - enemy.x) * 0.02;
+    enemy.y += (player.y - enemy.y) * 0.02;
 
-      window.addEventListener("keydown", (e) => (keys[e.key] = true));
-      window.addEventListener("keyup", (e) => (keys[e.key] = false));
+    enemy.x = Math.max(0, Math.min(canvas.width - enemy.size, enemy.x));
+    enemy.y = Math.max(0, Math.min(canvas.height - enemy.size, enemy.y));
 
-      function move(direction) {
-        if (direction === "up") keys["ArrowUp"] = true;
-        if (direction === "down") keys["ArrowDown"] = true;
-        if (direction === "left") keys["ArrowLeft"] = true;
-        if (direction === "right") keys["ArrowRight"] = true;
-        setTimeout(() => {
-          keys = {};
-        }, 100);
-      }
+    // Столкновение
+    if (Math.hypot(player.x - enemy.x, player.y - enemy.y) < player.size) {
+      alert("Ты проиграл! Очки: " + score);
+      restartGame();
+    }
 
-      function restartGame() {
-        if (score > highScore) {
-          highScore = score;
-          localStorage.setItem("highScore", highScore);
-          document.getElementById("highScore").textContent = highScore;
-        }
-        initGame();
-      }
+    score++;
+  }
 
-      function update() {
-        if (keys["ArrowUp"] && player.y > 0) player.y -= player.speed;
-        if (keys["ArrowDown"] && player.y < canvas.height - player.size)
-          player.y += player.speed;
-        if (keys["ArrowLeft"] && player.x > 0) player.x -= player.speed;
-        if (keys["ArrowRight"] && player.x < canvas.width - player.size)
-          player.x += player.speed;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = playerColor;
+    ctx.fillRect(player.x, player.y, player.size, player.size);
 
-        enemy.x += (player.x - enemy.x) * 0.02;
-        enemy.y += (player.y - enemy.y) * 0.02;
+    ctx.fillStyle = "red";
+    ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
 
-        enemy.x = Math.max(0, Math.min(canvas.width - enemy.size, enemy.x));
-        enemy.y = Math.max(0, Math.min(canvas.height - enemy.size, enemy.y));
+    ctx.fillStyle = "white";
+    ctx.font = "18px Arial";
+    ctx.fillText("Очки: " + score, 10, 20);
+  }
 
-        if (Math.hypot(player.x - enemy.x, player.y - enemy.y) < player.size) {
-          alert("Ты проиграл! Очки: " + score);
-          restartGame();
-        }
-        score++;
-      }
+  function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
 
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = playerColor;
-        ctx.fillRect(player.x, player.y, player.size, player.size);
+  initGame();
+  gameLoop();
+</script>
 
-        ctx.fillStyle = "red";
-        ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
-
-        ctx.fillStyle = "white";
-        ctx.fillText("Очки: " + score, 10, 20);
-      }
-
-      function gameLoop() {
-        update();
-        draw();
-        requestAnimationFrame(gameLoop);
-      }
-
-      initGame();
-      gameLoop();
-    </script>
-  </body>
+</body>
 </html>
-
